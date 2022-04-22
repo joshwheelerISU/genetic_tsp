@@ -52,12 +52,6 @@ def nameForInt( num ):
 		return nameForInt((num-1) // 26 ) + nameForInt((num-1)%26+1)
 
 
-
-
-
-
-
-
 class Scenario:
 
 	HARD_MODE_FRACTION_TO_REMOVE = 0.20 # Remove 20% of the edges
