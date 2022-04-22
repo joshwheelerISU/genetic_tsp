@@ -9,6 +9,7 @@ __pycache__/
 # IDE stuff
 .idea
 .iml
+.vscode
 
 # Distribution / packaging
 .Python
