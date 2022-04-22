@@ -270,5 +270,21 @@ class TSPSolver:
 			tot = tot + x
 		return tot, rcm
 
-
-
+	def get_mutation(self, givenpath):
+		cities = self._scenario.getCities()
+		mutationvalid = False
+		while mutationvalid == False:
+			a = random.randint(1, len(givenpath) - 1)
+			b = random.randint(1, len(givenpath) - 1)
+			while (a == b):
+				# try again, until we get random mutation points that aren't the same
+				a = random.randint(1, len(givenpath) - 1)
+				b = random.randint(1, len(givenpath) - 1)
+			# check to see if the cities are interchangeable
+			if givenpath[a - 1].costTo(givenpath[b] != float('inf')) and givenpath[b].costTo(givenpath[a+1] != float('inf')) and givenpath[b - 1].costTo(givenpath[a] != float('inf')) and givenpath[a].costTo(givenpath[b+1] != float('inf')):
+				mutationvalid = True
+		# we've found a valid mutation, carry out the swap
+		save = givenpath[a]
+		givenpath[a] = givenpath[b]
+		givenpath[b] = save
+		return givenpath
