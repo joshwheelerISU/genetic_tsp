@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+from random import shuffle
 from which_pyqt import PYQT_VER
 if PYQT_VER == 'PYQT5':
 	from PyQt5.QtCore import QLineF, QPointF
@@ -14,8 +15,7 @@ else:
 import time
 import numpy as np
 from TSPClasses import *
-import heapq
-import itertools
+from  TSP import *
 from q import arrayQueue
 from copy import deepcopy
 
@@ -95,7 +95,42 @@ class TSPSolver:
 	'''
 
 	def greedy( self,time_allowance=60.0 ):
-		pass
+		print(self.initialize_population(10))
+		results = {}
+		cities = self._scenario.getCities()
+		ncities = len(cities)
+		foundTour = False
+		bssf = None
+		tspCalculator = TSPCalculator(ncities)
+		start_time = time.time()
+
+		adj = np.zeros((tspCalculator.N, tspCalculator.N))
+		for i in range(ncities):
+			for j in range(ncities):
+				adj[i][j] = cities[i].costTo(cities[j])
+
+		while not foundTour and time.time() - start_time < time_allowance:
+			cost_matrix = tspCalculator.greedy_solve(adj)
+
+			route = [cities[i] for i in cost_matrix.path[:-1]]
+			bssf = TSPSolution(route)
+			bssf.cost = cost_matrix.cost
+
+			if bssf.cost < np.inf:
+				# Found a valid route
+				foundTour = True
+
+		end_time = time.time()
+		results['cost'] = bssf.cost if foundTour else math.inf
+		results['time'] = end_time - start_time
+		results['count'] = tspCalculator.bffs_updates
+		results['soln'] = bssf
+		results['max'] = None
+		results['total'] = None
+		results['pruned'] = None
+		return results
+           
+
 	
 
 	''' <summary>
@@ -152,7 +187,7 @@ class TSPSolver:
 		defaulttour = self.defaultRandomTour()
 		bssf = defaulttour["soln"]
 		newbsf = None
-		boundtest = bssf.cost
+		boundtest = bssf.costsza
 		pathtest = bssf.route
 		pmaxsize = 0
 		totalnodescreated = 1
@@ -238,6 +273,9 @@ class TSPSolver:
 	def fancy( self,time_allowance=60.0 ):
 		pass
 
+	
+
+
 
 	def reduceMatrix(self, rcm):
 		# min of each col
@@ -270,6 +308,22 @@ class TSPSolver:
 			tot = tot + x
 		return tot, rcm
 
+
+
+	def initialize_population(self, num_of_generations):
+			cities = self._scenario.getCities()
+			print("shuffled cities : ", cities)
+			population = []
+
+			for i in range(num_of_generations):
+				shuffle(cities)
+				print("shuffled cities : ", cities)
+				new_cities = deepcopy(cities)
+				population.append(TSPSolution(new_cities))
+
+			return population
+
+	
 	def get_mutation(self, givenpath):
 		cities = self._scenario.getCities()
 		mutationvalid = False

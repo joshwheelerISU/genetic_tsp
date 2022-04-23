@@ -8,6 +8,7 @@ import time
 
 
 
+
 class TSPSolution:
 	def __init__( self, listOfCities):
 		self.route = listOfCities
