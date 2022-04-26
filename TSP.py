@@ -25,12 +25,12 @@ class TSPCalculator:
         self.solFound = 0
 
     def initialize(self, matrix):
-      # Initializing the problem.
+        # Initializing the problem.
 
         self.greedy_solve(matrix)
         self.reset()
         # create source cost matrix
-        cost_matrix = CostMatrix(self.get_state(), 0, matrix, 0 , 0, [0])
+        cost_matrix = CostMatrix(self.get_state(), 0, matrix, 0, 0, [0])
 
         # reduce matrix and update cost
         # Time and Space - O(n^2)
@@ -39,7 +39,7 @@ class TSPCalculator:
         # add to priority queue
         # Time - O(log n)
         self.priorityQueue.insert(cost_matrix)
-    
+
     def greedy_solve(self, matrix):
         """
         For each node, find the cheapest path to the next node, and if there is a path back to the
@@ -59,7 +59,7 @@ class TSPCalculator:
         # Complexity time - O(n^3)
 
         for length in range(self.N):
-            i = random.randint(1, self.N) -1
+            i = random.randint(1, self.N) - 1
             path.append(i)
             min_val = math.inf
             min_loc = -1
@@ -89,8 +89,8 @@ class TSPCalculator:
             # all nodes are visited
             if len(path) == self.N:
                 # check if there is a path back to source
-                if  matrix[path[len(path) -1]][path[0]] != math.inf:
-                    cost+=  matrix[path[len(path) -1]][path[0]]
+                if matrix[path[len(path) - 1]][path[0]] != math.inf:
+                    cost += matrix[path[len(path) - 1]][path[0]]
                     path.append(path[0])
 
                     self.bffs = cost
@@ -123,7 +123,6 @@ class TSPCalculator:
 
         end = time.time()
         print("Time ", end - start)
-
 
         return self.bffs_cost_matrix
 
@@ -171,7 +170,7 @@ class TSPCalculator:
 
                     # child state
                     next_node = CostMatrix(self.get_state(), node.cost,
-                                           next_matrix, i , j , new_path)
+                                           next_matrix, i, j, new_path)
 
                     # reduce matrix
                     # Time & Space - O(n^2)
@@ -199,7 +198,6 @@ class TSPCalculator:
             else:
                 self.prune_state()
 
-
         end_time = time.time()
         print("Time Taken: ", end_time - start_time)
         return self.bffs_cost_matrix
@@ -223,7 +221,6 @@ class TSPCalculator:
         for elem in reduced_matrix:
             row_min.append(min(elem))
 
-
         # Subtract the row minimum
         # Time - O(n^2)
         # Space - O(n^2)
@@ -243,7 +240,7 @@ class TSPCalculator:
                     col_min = reduced_matrix[i][j]
             column_min.append(col_min)
 
-        #print("min cols ", column_min, "\n")
+        # print("min cols ", column_min, "\n")
 
         # Subtract the column minimum
         # Time - O(n^2)
@@ -257,7 +254,7 @@ class TSPCalculator:
         # add row residual
         # O(n^2)
         for i in range(len(row_min)):
-            if row_min[i] == math.inf and i  in cost_matrix.path[:-1]:
+            if row_min[i] == math.inf and i in cost_matrix.path[:-1]:
                 bound = bound + 0
             else:
                 bound = bound + row_min[i]
@@ -265,12 +262,12 @@ class TSPCalculator:
         # add column residual
         #  O(n^2)
         for j in range(len(column_min)):
-            if column_min[j] == math.inf and j  in cost_matrix.path[1:]:
+            if column_min[j] == math.inf and j in cost_matrix.path[1:]:
                 bound = bound + 0
             else:
                 bound = bound + column_min[j]
 
-        #print("bound of matrix: ", bound)
+        # print("bound of matrix: ", bound)
 
         return bound
 
@@ -312,8 +309,8 @@ class TSPCalculator:
             # Space & Time -  O(n^2)
             cost_matrix.cost = self.reduce_matrix(cost_matrix) + pos_cost
         else:
-            cost_matrix.cost  = pos_cost
-     
+            cost_matrix.cost = pos_cost
+
     def check_reduce_matrix(self, matrix):
         """
         The function checks if the rows and columns of the matrix are reduced
@@ -330,7 +327,6 @@ class TSPCalculator:
         for row in matrix:
             zeros.append(min(row))
 
-
         # check if columns are reduced
         # O(n^2)
         for j in range(len(matrix[0])):
@@ -339,8 +335,6 @@ class TSPCalculator:
                 if col_min > matrix[i][j]:
                     col_min = matrix[i][j]
             zeros.append(col_min)
-
-    
 
         # if element not equal to 0 and infinity
         # return false
@@ -375,4 +369,3 @@ class TSPCalculator:
         It takes a list of numbers and returns the sum of the numbers.
         """
         self.solFound += 1
-
