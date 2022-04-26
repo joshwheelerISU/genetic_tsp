@@ -302,17 +302,13 @@ class TSPSolver:
 
     def initialize_population(self, num_of_generations):
         cities = self._scenario.getCities()
-        print("shuffled cities : ", cities)
+
         population = []
-        print("cities ", id(cities))
 
         for i in range(num_of_generations):
             list_copy = cities[1:]
-
-            print("List copy ",id(list_copy))
             shuffle(list_copy)
             cities[1:] = list_copy
-            print("shuffled cities : ", cities)
             new_cities = deepcopy(cities)
             population.append(TSPSolution(new_cities))
 
