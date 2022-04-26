@@ -323,11 +323,10 @@ class TSPSolver:
                 adj[i][j] = cities[i].costTo(cities[j])
         
         # create a bssf with the greedy algorithm
-        #bssf = tspCalculator.greedy_solve(adj)
+        bssf = tspCalculator.greedy_solve(adj)
 
         # initialize the population with a size of (50)
         population = self.initialize_population(50)
-        bssf = population[0]
 
         # assign 3 separate paths from the population pool
         # first will be the shortest cost, second will be the next, and thrid the worst
@@ -345,7 +344,7 @@ class TSPSolver:
             chosen = third
         
         # now send the bssf and the chosen path into the crossover function
-        new_path = self.crossover(bssf, chosen)
+        new_path = self.crossover(bssf.route, chosen.route)
 
         end_time = time.time()
         results['cost'] = bssf.cost if foundTour else math.inf
@@ -395,9 +394,6 @@ class TSPSolver:
         
         # we now have 3 unique indexes from the population pool, so return them
         return pop_list[0], pop_list[1], pop_list[2]
-    
-    def weighted_selection():
-        pass
 
 
     def get_mutation(self, givenpath):
@@ -421,35 +417,17 @@ class TSPSolver:
         givenpath[b] = save
         return givenpath
 
-    # function
-    def crossover(self, bssf, rand_path):
+    # function takes the route of the bssf and route of the chosen path, then
+    # crosses them over to create a new path
+    def crossover(self, bssf, chosen):
         # take half of the best stored path
         # floor value in case of odd length
         new_path = bssf[:math.floor(len(bssf) / 2)]
 
-        # Now take half of the rand_path and combine 
+        # Now take half of the chosen and combine 
         # the 2 to create the new path
-        for i in rand_path: 
+        for i in chosen: 
             if i not in new_path:
                 new_path.append(i)
         
-        # check to see if the newly created path is actually valid
-        # if a path's cost comes out to infinity, set the flag to true
-        inf_flag = False
-        for i in range(len(new_path)):
-            # make sure not to go out of bounds. if you are on the last
-            # element, check the distance of the last to the first
-            if i == len(new_path):
-                if new_path[i].costTo(new_path[0] != float('inf')):
-                    inf_flag = True
-            
-            elif new_path[i].costTo(new_path[i+1] != float('inf')):
-                inf_flag = True
-                # no need to keep checking
-                break
-        
-        if not inf_flag:
-            return new_path
-        # else
-        print("Newly created path is not valid")
-        return None
+        return new_path
