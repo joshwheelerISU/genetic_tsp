@@ -19,16 +19,16 @@ else:
 	raise Exception('Unsupported Version of PyQt: {}'.format(PYQT_VER))
 
 
-#TODO: Error checking on txt boxes
-#TODO: Color strings
-
-
-# Import in the code with the actual implementation
+#TODO: Error checking on txt boxestation
 from TSPSolver import *
 from TSPClasses import *
 
 
 class PointLineView( QWidget ):
+#TODO: Color strings
+
+
+# Import in the code with the actual implemen
 	def __init__( self, status_bar, data_range ):
 		super(QWidget,self).__init__()
 		self.setMinimumSize(950,600)

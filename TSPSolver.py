@@ -2,45 +2,44 @@
 
 from random import shuffle
 from which_pyqt import PYQT_VER
+
 if PYQT_VER == 'PYQT5':
-	from PyQt5.QtCore import QLineF, QPointF
+    from PyQt5.QtCore import QLineF, QPointF
 # elif PYQT_VER == 'PYQT4':
 # 	from PyQt4.QtCore import QLineF, QPointF
 else:
-	raise Exception('Unsupported Version of PyQt: {}'.format(PYQT_VER))
-
-
-
+    raise Exception('Unsupported Version of PyQt: {}'.format(PYQT_VER))
 
 import time
 import numpy as np
 from TSPClasses import *
-from  TSP import *
+from TSP import *
 from q import arrayQueue
 from copy import deepcopy
 
 
 class snode:
-	def __init__(self):
-		path = []
-		matrix = []
-		cost = 0
-		nodeid = 0
-	def getlevel(self):
-		count = 0
-		for x in self.path:
-			count = count + 1
-		return count
+    def __init__(self):
+        path = []
+        matrix = []
+        cost = 0
+        nodeid = 0
+
+    def getlevel(self):
+        count = 0
+        for x in self.path:
+            count = count + 1
+        return count
 
 
 class TSPSolver:
-	def __init__( self, gui_view ):
-		self._scenario = None
+    def __init__(self, gui_view):
+        self._scenario = None
 
-	def setupWithScenario( self, scenario ):
-		self._scenario = scenario
+    def setupWithScenario(self, scenario):
+        self._scenario = scenario
 
-	''' <summary>
+    ''' <summary>
 		This is the entry point for the default solver
 		which just finds a valid random tour.  Note this could be used to find your
 		initial BSSF.
@@ -50,39 +49,38 @@ class TSPSolver:
 		solution found, and three null values for fields not used for this 
 		algorithm</returns> 
 	'''
-	
-	def defaultRandomTour( self, time_allowance=60.0 ):
-		results = {}
-		cities = self._scenario.getCities()
-		ncities = len(cities)
-		foundTour = False
-		count = 0
-		bssf = None
-		start_time = time.time()
-		while not foundTour and time.time()-start_time < time_allowance:
-			# create a random permutation
-			perm = np.random.permutation( ncities )
-			route = []
-			# Now build the route using the random permutation
-			for i in range( ncities ):
-				route.append( cities[ perm[i] ] )
-			bssf = TSPSolution(route)
-			count += 1
-			if bssf.cost < np.inf:
-				# Found a valid route
-				foundTour = True
-		end_time = time.time()
-		results['cost'] = bssf.cost if foundTour else math.inf
-		results['time'] = end_time - start_time
-		results['count'] = count
-		results['soln'] = bssf
-		results['max'] = None
-		results['total'] = None
-		results['pruned'] = None
-		return results
 
+    def defaultRandomTour(self, time_allowance=60.0):
+        results = {}
+        cities = self._scenario.getCities()
+        ncities = len(cities)
+        foundTour = False
+        count = 0
+        bssf = None
+        start_time = time.time()
+        while not foundTour and time.time() - start_time < time_allowance:
+            # create a random permutation
+            perm = np.random.permutation(ncities)
+            route = []
+            # Now build the route using the random permutation
+            for i in range(ncities):
+                route.append(cities[perm[i]])
+            bssf = TSPSolution(route)
+            count += 1
+            if bssf.cost < np.inf:
+                # Found a valid route
+                foundTour = True
+        end_time = time.time()
+        results['cost'] = bssf.cost if foundTour else math.inf
+        results['time'] = end_time - start_time
+        results['count'] = count
+        results['soln'] = bssf
+        results['max'] = None
+        results['total'] = None
+        results['pruned'] = None
+        return results
 
-	''' <summary>
+    ''' <summary>
 		This is the entry point for the greedy solver, which you must implement for 
 		the group project (but it is probably a good idea to just do it for the branch-and
 		bound project as a way to get your feet wet).  Note this could be used to find your
@@ -94,46 +92,43 @@ class TSPSolver:
 		algorithm</returns> 
 	'''
 
-	def greedy( self,time_allowance=60.0 ):
-		print(self.initialize_population(10))
-		results = {}
-		cities = self._scenario.getCities()
-		ncities = len(cities)
-		foundTour = False
-		bssf = None
-		tspCalculator = TSPCalculator(ncities)
-		start_time = time.time()
+    def greedy(self, time_allowance=60.0):
+        print(self.initialize_population(10))
+        results = {}
+        cities = self._scenario.getCities()
+        ncities = len(cities)
+        foundTour = False
+        bssf = None
+        tspCalculator = TSPCalculator(ncities)
+        start_time = time.time()
 
-		adj = np.zeros((tspCalculator.N, tspCalculator.N))
-		for i in range(ncities):
-			for j in range(ncities):
-				adj[i][j] = cities[i].costTo(cities[j])
+        adj = np.zeros((tspCalculator.N, tspCalculator.N))
+        for i in range(ncities):
+            for j in range(ncities):
+                adj[i][j] = cities[i].costTo(cities[j])
 
-		while not foundTour and time.time() - start_time < time_allowance:
-			cost_matrix = tspCalculator.greedy_solve(adj)
+        while not foundTour and time.time() - start_time < time_allowance:
+            cost_matrix = tspCalculator.greedy_solve(adj)
 
-			route = [cities[i] for i in cost_matrix.path[:-1]]
-			bssf = TSPSolution(route)
-			bssf.cost = cost_matrix.cost
+            route = [cities[i] for i in cost_matrix.path[:-1]]
+            bssf = TSPSolution(route)
+            bssf.cost = cost_matrix.cost
 
-			if bssf.cost < np.inf:
-				# Found a valid route
-				foundTour = True
+            if bssf.cost < np.inf:
+                # Found a valid route
+                foundTour = True
 
-		end_time = time.time()
-		results['cost'] = bssf.cost if foundTour else math.inf
-		results['time'] = end_time - start_time
-		results['count'] = tspCalculator.bffs_updates
-		results['soln'] = bssf
-		results['max'] = None
-		results['total'] = None
-		results['pruned'] = None
-		return results
-           
+        end_time = time.time()
+        results['cost'] = bssf.cost if foundTour else math.inf
+        results['time'] = end_time - start_time
+        results['count'] = tspCalculator.bffs_updates
+        results['soln'] = bssf
+        results['max'] = None
+        results['total'] = None
+        results['pruned'] = None
+        return results
 
-	
-
-	''' <summary>
+    ''' <summary>
 		This is the entry point for the branch-and-bound algorithm that you will implement
 		</summary>
 		<returns>results dictionary for GUI that contains three ints: cost of best solution, 
@@ -141,127 +136,128 @@ class TSPSolver:
 		not include the initial BSSF), the best solution found, and three more ints: 
 		max queue size, total number of states created, and number of pruned states.</returns> 
 	'''
-		
-	def branchAndBound( self, time_allowance=60.0):
-		# var init - O(n)
-		results = {}
-		cities = self._scenario.getCities()
-		ncities = len(cities)
-		foundTour = False
-		count = 0
-		pruned = 0
-		bssf = None
-		start_time = time.time()
 
-		# blank n*n matrix to use later (O(n^2))
-		nnblank = []
-		for x in range(ncities):
-			ydown = []
-			for y in range(ncities):
-				ydown.append(0)
-			nnblank.append((ydown))
+    def branchAndBound(self, time_allowance=60.0):
+        # var init - O(n)
+        results = {}
+        cities = self._scenario.getCities()
+        ncities = len(cities)
+        foundTour = False
+        count = 0
+        pruned = 0
+        bssf = None
+        start_time = time.time()
 
-		# priority queue
-		pq = arrayQueue()
+        # blank n*n matrix to use later (O(n^2))
+        nnblank = []
+        for x in range(ncities):
+            ydown = []
+            for y in range(ncities):
+                ydown.append(0)
+            nnblank.append((ydown))
 
-		# algorithm body
-		# start initial cost matrix for node 0
-		rcm = nnblank
-		for x in range(ncities):
-			for y in range(ncities):
-				val = cities[x].costTo(cities[y])
-				rcm[x][y] = val
+        # priority queue
+        pq = arrayQueue()
 
-		# reduce that rcm for the first time to represent the rcm of the root node
-		lim, rcm = self.reduceMatrix(rcm)
+        # algorithm body
+        # start initial cost matrix for node 0
+        rcm = nnblank
+        for x in range(ncities):
+            for y in range(ncities):
+                val = cities[x].costTo(cities[y])
+                rcm[x][y] = val
 
-		# drop that root node in
-		rn = snode()
-		rn.cost = lim
-		rn.matrix = rcm
-		rn.path = [0]
-		rn.nodeid = 0
-		pq.insert(rn, rn.cost)
+        # reduce that rcm for the first time to represent the rcm of the root node
+        lim, rcm = self.reduceMatrix(rcm)
 
-		# lets get a quick and dirty BSSF - Using the above random tour method.
-		defaulttour = self.defaultRandomTour()
-		bssf = defaulttour["soln"]
-		newbsf = None
-		boundtest = bssf.costsza
-		pathtest = bssf.route
-		pmaxsize = 0
-		totalnodescreated = 1
+        # drop that root node in
+        rn = snode()
+        rn.cost = lim
+        rn.matrix = rcm
+        rn.path = [0]
+        rn.nodeid = 0
+        pq.insert(rn, rn.cost)
 
-		# start the main algorithm loop
-		while time.time() - start_time < time_allowance and pq.isempty() != True:  # Worst Case, 60 seconds.
-			# update maximum pq count
-			if pmaxsize < pq.size:
-				pmaxsize = pq.size
+        # lets get a quick and dirty BSSF - Using the above random tour method.
+        defaulttour = self.defaultRandomTour()
+        bssf = defaulttour["soln"]
+        newbsf = None
+        boundtest = bssf.costsza
+        pathtest = bssf.route
+        pmaxsize = 0
+        totalnodescreated = 1
 
-			# pop a node off the queue
-			curnode = pq.delete_min()
-			matrix = curnode.matrix
+        # start the main algorithm loop
+        while time.time() - start_time < time_allowance and pq.isempty() != True:  # Worst Case, 60 seconds.
+            # update maximum pq count
+            if pmaxsize < pq.size:
+                pmaxsize = pq.size
 
-			# check to see if we should just drop this node immediately
-			if(curnode.cost < bssf.cost):
-				min = -1
-				mincost = curnode.cost
-				if len(curnode.path) == ncities:
-					# we have a complete path, check to make sure we can go back to the beginning
-					if matrix[curnode.nodeid][0] != float('inf'):
-						curnode.cost = curnode.cost + matrix[curnode.nodeid][0]
-						nroute = []
-						for i in curnode.path:
-							nroute.append(cities[i])
-						bssf = TSPSolution(nroute)
-						count = count + 1
-						foundTour = True
-				else:
-					for it in range(ncities):  # O(n)
-						if it not in curnode.path:  # make sure that we haven't been there before
-							if matrix[curnode.nodeid][it] + curnode.cost < boundtest and matrix[curnode.nodeid][it] != float('inf'): # trim if the solution is worse than the initial BSSF
-								min = it
-								travelcost = matrix[curnode.nodeid][it]
+            # pop a node off the queue
+            curnode = pq.delete_min()
+            matrix = curnode.matrix
 
-								# make a new node to push onto the queue
-								pnode = snode()
-								pnode.matrix = [row[:] for row in matrix]
-								pnode.path = deepcopy(curnode.path)
-								pnode.path.append(it)
-								pnode.nodeid = it
+            # check to see if we should just drop this node immediately
+            if (curnode.cost < bssf.cost):
+                min = -1
+                mincost = curnode.cost
+                if len(curnode.path) == ncities:
+                    # we have a complete path, check to make sure we can go back to the beginning
+                    if matrix[curnode.nodeid][0] != float('inf'):
+                        curnode.cost = curnode.cost + matrix[curnode.nodeid][0]
+                        nroute = []
+                        for i in curnode.path:
+                            nroute.append(cities[i])
+                        bssf = TSPSolution(nroute)
+                        count = count + 1
+                        foundTour = True
+                else:
+                    for it in range(ncities):  # O(n)
+                        if it not in curnode.path:  # make sure that we haven't been there before
+                            if matrix[curnode.nodeid][it] + curnode.cost < boundtest and matrix[curnode.nodeid][
+                                it] != float('inf'):  # trim if the solution is worse than the initial BSSF
+                                min = it
+                                travelcost = matrix[curnode.nodeid][it]
 
-								# set rows and columns to infinity
-								for it in range(ncities):
-									pnode.matrix[curnode.nodeid][it] = float('inf')
-									pnode.matrix[it][pnode.nodeid] = float('inf')
+                                # make a new node to push onto the queue
+                                pnode = snode()
+                                pnode.matrix = [row[:] for row in matrix]
+                                pnode.path = deepcopy(curnode.path)
+                                pnode.path.append(it)
+                                pnode.nodeid = it
 
-								# reduce the matrix
-								addcost, pmatrix = self.reduceMatrix(pnode.matrix)
+                                # set rows and columns to infinity
+                                for it in range(ncities):
+                                    pnode.matrix[curnode.nodeid][it] = float('inf')
+                                    pnode.matrix[it][pnode.nodeid] = float('inf')
 
-								# push the new node onto the priority queue
-								pnode.matrix = pmatrix
-								pnode.cost = curnode.cost + addcost + travelcost
-								pq.insert(pnode, pnode.cost)
-								# update node count
-								totalnodescreated = totalnodescreated + 1
-							else:
-								# we're pruning this path
-								pruned = pruned + 1
-			else:
-				pruned = pruned + 1
+                                # reduce the matrix
+                                addcost, pmatrix = self.reduceMatrix(pnode.matrix)
 
-		# return setup - O(n)
-		end_time = time.time()
-		results['cost'] = bssf.cost if foundTour else math.inf
-		results['time'] = end_time - start_time
-		results['count'] = count
-		results['soln'] = bssf
-		results['max'] = pmaxsize
-		results['total'] = totalnodescreated
-		results['pruned'] = pruned + pq.size
-		return results
+                                # push the new node onto the priority queue
+                                pnode.matrix = pmatrix
+                                pnode.cost = curnode.cost + addcost + travelcost
+                                pq.insert(pnode, pnode.cost)
+                                # update node count
+                                totalnodescreated = totalnodescreated + 1
+                            else:
+                                # we're pruning this path
+                                pruned = pruned + 1
+            else:
+                pruned = pruned + 1
 
-	''' <summary>
+        # return setup - O(n)
+        end_time = time.time()
+        results['cost'] = bssf.cost if foundTour else math.inf
+        results['time'] = end_time - start_time
+        results['count'] = count
+        results['soln'] = bssf
+        results['max'] = pmaxsize
+        results['total'] = totalnodescreated
+        results['pruned'] = pruned + pq.size
+        return results
+
+    ''' <summary>
 		This is the entry point for the algorithm you'll write for your group project.
 		</summary>
 		<returns>results dictionary for GUI that contains three ints: cost of best solution, 
@@ -269,76 +265,76 @@ class TSPSolver:
 		best solution found.  You may use the other three field however you like.
 		algorithm</returns> 
 	'''
-		
-	def fancy( self,time_allowance=60.0 ):
-		pass
 
-	
+    def fancy(self, time_allowance=60.0):
+        pass
 
+    def reduceMatrix(self, rcm):
+        # min of each col
+        cities = self._scenario.getCities()
+        ncities = len(cities)
+        reduce = []
+        for x in range(ncities):
+            min = float('inf')
+            for y in range(ncities):
+                if rcm[x][y] <= min:
+                    min = rcm[x][y]
+            # go back through and reduce that col
+            if (min != float('inf')):
+                reduce.append(min)
+                for y in range(ncities):
+                    rcm[x][y] = rcm[x][y] - min
+        # now go back and do the same in the opposite direction
+        for y in range(ncities):
+            min = float('inf')
+            for x in range(ncities):
+                if rcm[x][y] <= min:
+                    min = rcm[x][y]
+            # go back through and reduce that col
+            if (min != float('inf')):
+                reduce.append(min)
+                for x in range(ncities):
+                    rcm[x][y] = rcm[x][y] - min
+        tot = 0
+        for x in reduce:
+            tot = tot + x
+        return tot, rcm
 
+    def initialize_population(self, num_of_generations):
+        cities = self._scenario.getCities()
+        print("shuffled cities : ", cities)
+        population = []
+        print("cities ", id(cities))
 
-	def reduceMatrix(self, rcm):
-		# min of each col
-		cities = self._scenario.getCities()
-		ncities = len(cities)
-		reduce = []
-		for x in range(ncities):
-			min = float('inf')
-			for y in range(ncities):
-				if rcm[x][y] <= min:
-					min = rcm[x][y]
-			# go back through and reduce that col
-			if(min != float('inf')):
-				reduce.append(min)
-				for y in range(ncities):
-					rcm[x][y] = rcm[x][y] - min
-		# now go back and do the same in the opposite direction
-		for y in range(ncities):
-			min = float('inf')
-			for x in range(ncities):
-				if rcm[x][y] <= min:
-					min = rcm[x][y]
-			# go back through and reduce that col
-			if (min != float('inf')):
-				reduce.append(min)
-				for x in range(ncities):
-					rcm[x][y] = rcm[x][y] - min
-		tot = 0
-		for x in reduce:
-			tot = tot + x
-		return tot, rcm
+        for i in range(num_of_generations):
+            list_copy = cities[1:]
 
+            print("List copy ",id(list_copy))
+            shuffle(list_copy)
+            cities[1:] = list_copy
+            print("shuffled cities : ", cities)
+            new_cities = deepcopy(cities)
+            population.append(TSPSolution(new_cities))
 
+        return population
 
-	def initialize_population(self, num_of_generations):
-			cities = self._scenario.getCities()
-			print("shuffled cities : ", cities)
-			population = []
-
-			for i in range(num_of_generations):
-				shuffle(cities)
-				print("shuffled cities : ", cities)
-				new_cities = deepcopy(cities)
-				population.append(TSPSolution(new_cities))
-
-			return population
-
-	
-	def get_mutation(self, givenpath):
-		cities = self._scenario.getCities()
-		mutationvalid = False
-		while mutationvalid == False:
-			a = random.randint(1, len(givenpath) - 1)
-			b = random.randint(1, len(givenpath) - 1)
-			while (a == b):
-				# try again, until we get random mutation points that aren't the same
-				a = random.randint(1, len(givenpath) - 1)
-				b = random.randint(1, len(givenpath) - 1)
-			# check to see if the cities are interchangeable
-			if givenpath[a - 1].costTo(givenpath[b] != float('inf')) and givenpath[b].costTo(givenpath[a+1] != float('inf')) and givenpath[b - 1].costTo(givenpath[a] != float('inf')) and givenpath[a].costTo(givenpath[b+1] != float('inf')):
-				mutationvalid = True
-		# we've found a valid mutation, carry out the swap
-		save = givenpath[a]
-		givenpath[a] = givenpath[b]
-		givenpath[b] = save
-		return givenpath
+    def get_mutation(self, givenpath):
+        cities = self._scenario.getCities()
+        mutationvalid = False
+        while mutationvalid == False:
+            a = random.randint(1, len(givenpath) - 1)
+            b = random.randint(1, len(givenpath) - 1)
+            while (a == b):
+                # try again, until we get random mutation points that aren't the same
+                a = random.randint(1, len(givenpath) - 1)
+                b = random.randint(1, len(givenpath) - 1)
+            # check to see if the cities are interchangeable
+            if givenpath[a - 1].costTo(givenpath[b] != float('inf')) and givenpath[b].costTo(
+                    givenpath[a + 1] != float('inf')) and givenpath[b - 1].costTo(givenpath[a] != float('inf')) and \
+                    givenpath[a].costTo(givenpath[b + 1] != float('inf')):
+                mutationvalid = True
+        # we've found a valid mutation, carry out the swap
+        save = givenpath[a]
+        givenpath[a] = givenpath[b]
+        givenpath[b] = save
+        return givenpath

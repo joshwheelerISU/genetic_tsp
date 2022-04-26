@@ -100,15 +100,6 @@ class TSPCalculator:
                     print("Time ", end - start)
                     return self.bffs_cost_matrix
 
-                    # # update bffs
-                    # if self.bffs > cost:
-                    #     self.bffs = cost
-                    #     self.bffs_cost_matrix = CostMatrix(-1, self.bffs, matrix, path[len(path) -2], path[0], path)
-                    #     self.update_bbfs()
-                    #
-                    # # del path
-                    # path = []
-                    # cost = 0
 
                 # no path to source
                 else:
