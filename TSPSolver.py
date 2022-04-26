@@ -267,6 +267,14 @@ class TSPSolver:
 	'''
 
     def fancy(self, time_allowance=60.0):
+        # 1. call greedy algorithm function to get bssf
+        # 2. call init population function
+        # 3. call function to retrieve 3 random samples from population, each with a
+        # different weight depending on their cost
+        # 4. call crossover function
+        # 5. determine if mutation will occur, if so, call mutation function
+        # 6. compare the result to the current best results and switch paths accordingly
+
         pass
 
     def reduceMatrix(self, rcm):
@@ -334,3 +342,36 @@ class TSPSolver:
         givenpath[a] = givenpath[b]
         givenpath[b] = save
         return givenpath
+
+
+    def crossover(self, bssf, rand_path):
+        # take half of the best stored path
+        # floor value in case of odd length
+        new_path = bssf[:math.floor(len(bssf) / 2)]
+
+        # Now take half of the rand_path and combine 
+        # the 2 to create the new path
+        for i in rand_path: 
+            if i not in new_path:
+                new_path.append(i)
+        
+        # check to see if the newly created path is actually valid
+        # if a path's cost comes out to infinity, set the flag to true
+        inf_flag = False
+        for i in range(len(new_path)):
+            # make sure not to go out of bounds. if you are on the last
+            # element, check the distance of the last to the first
+            if i == len(new_path):
+                if new_path[i].costTo(new_path[0] != float('inf')):
+                    inf_flag = True
+            
+            elif new_path[i].costTo(new_path[i+1] != float('inf')):
+                inf_flag = True
+                # no need to keep checking
+                break
+        
+        if not inf_flag:
+            return new_path
+        # else
+        print("Newly created path is not valid")
+        return None
