@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+from hashlib import new
 from random import shuffle
 from which_pyqt import PYQT_VER
 
@@ -35,6 +36,7 @@ class snode:
 class TSPSolver:
     def __init__(self, gui_view):
         self._scenario = None
+        self.bssf = None
 
     def setupWithScenario(self, scenario):
         self._scenario = scenario
@@ -248,6 +250,7 @@ class TSPSolver:
 
         # return setup - O(n)
         end_time = time.time()
+        
         results['cost'] = bssf.cost if foundTour else math.inf
         results['time'] = end_time - start_time
         results['count'] = count
@@ -311,6 +314,7 @@ class TSPSolver:
         bssf = None
         # finding the initial bssf - shouldn't count towards time
         bssf = self.greedy()['soln']
+        self.bssf = bssf
 
         start_time = time.time()
 
@@ -371,7 +375,11 @@ class TSPSolver:
             shuffle(list_copy)
             cities[1:] = list_copy
             new_cities = deepcopy(cities)
-            population.append(TSPSolution(new_cities))
+            # changed back to list of paths
+            # I think it would be eaiser if we just called 
+            # the cost once when we crossover and check if 
+            # the new child is better than bssf
+            population.append(new_cities)
 
         return population
 
@@ -440,9 +448,18 @@ class TSPSolver:
             new_path = self.get_mutation(new_path)
         return new_path
 
+
+    # Temp function
+
     def get_parent(self):
         pass
 
+    # Possible next gen implementation
+    # I think it would be easier to always randomly 
+    # select 2 parents from the prev_population and crossover
+    # into a child. Add the child to the next gen 
+    
+    
     def test_next_generation(self, prev_population):
         """
         For each individual in the next generation, select two parents at random, and create a child by
@@ -458,19 +475,23 @@ class TSPSolver:
             parent1, parent2 = None, None 
 
             while parent1 == parent2:
+                #TODO: 
+                #select parents method implementation needs to be decided
+
                 parent1 = self.get_parent()
                 parent2 = self.get_parent()
+
+            new_path  = self.crossover(parent1, parent2)
+            temp_bssf = TSPSolution(new_path)
+
+           # Hear we could possibly update the bssf if the crossover
+           # is ever better than  the greedy solution
+            if self.bssf.cost > temp_bssf.cost:
+                self.bssf =  temp_bssf 
 
             next_generation[i] = self.crossover(parent1, parent2)
 
         return next_generation
 
-        
     
-            
-       
-
-
-
-        pass
 
