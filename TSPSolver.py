@@ -182,7 +182,7 @@ class TSPSolver:
         defaulttour = self.defaultRandomTour()
         bssf = defaulttour["soln"]
         newbsf = None
-        boundtest = bssf.costsza
+        boundtest = bssf.cost
         pathtest = bssf.route
         pmaxsize = 0
         totalnodescreated = 1
@@ -310,7 +310,7 @@ class TSPSolver:
         count = 0
         bssf = None
         # finding the initial bssf - shouldn't count towards time
-        bssf = self.greedy()[bssf]
+        bssf = self.greedy()['soln']
 
         start_time = time.time()
 
@@ -344,13 +344,10 @@ class TSPSolver:
         return results
 
     def weight_and_select(self, f, s, t):
-        nf = TSPSolution(f)
-        ns = TSPSolution(s)
-        nt = TSPSolution(t)
-        sumsol = nf.cost + ns.cost + nt.cost
-        prob1 = nf.cost / sumsol * 100
-        prob2 = ns.cost / sumsol * 100
-        prob3 = nt.cost / sumsol * 100
+        sumsol = f.cost + s.cost + t.cost
+        prob1 = f.cost / sumsol * 100
+        prob2 = s.cost / sumsol * 100
+        prob3 = t.cost / sumsol * 100
         dieroll = random.randint(0, 100)
 
         if dieroll > prob3:
