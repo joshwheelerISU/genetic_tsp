@@ -402,15 +402,15 @@ class TSPSolver:
         while mutationvalid == False:
             a = random.randint(1, len(givenpath) - 1)
             b = random.randint(1, len(givenpath) - 1)
-            while (a == b):
-                # try again, until we get random mutation points that aren't the same
-                a = random.randint(1, len(givenpath) - 1)
-                b = random.randint(1, len(givenpath) - 1)
-            # check to see if the cities are interchangeable
-            if givenpath[a - 1].costTo(givenpath[b] != float('inf')) and givenpath[b].costTo(
-                    givenpath[a + 1] != float('inf')) and givenpath[b - 1].costTo(givenpath[a] != float('inf')) and \
-                    givenpath[a].costTo(givenpath[b + 1] != float('inf')):
-                mutationvalid = True
+            # while (a == b):
+            #     # try again, until we get random mutation points that aren't the same
+            #     a = random.randint(1, len(givenpath) - 1)
+            #     b = random.randint(1, len(givenpath) - 1)
+            # # check to see if the cities are interchangeable
+            # if givenpath[a - 1].costTo(givenpath[b] != float('inf')) and givenpath[b].costTo(
+            #         givenpath[a + 1] != float('inf')) and givenpath[b - 1].costTo(givenpath[a] != float('inf')) and \
+            #         givenpath[a].costTo(givenpath[b + 1] != float('inf')):
+            #     mutationvalid = True
         # we've found a valid mutation, carry out the swap
         save = givenpath[a]
         givenpath[a] = givenpath[b]
@@ -428,4 +428,6 @@ class TSPSolver:
         for i in rand_path:
             if i not in new_path:
                 new_path.append(i)
+        if random.randint(0,100) > 80:
+            new_path = self.get_mutation(new_path)
         return new_path
