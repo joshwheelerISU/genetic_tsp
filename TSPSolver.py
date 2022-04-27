@@ -332,6 +332,7 @@ class TSPSolver:
                 # additional check for if this is the new bssf
                 if bssf.cost > child.cost:
                     bssf = child
+                    count = count + 1
         # final return preparation
         end_time = time.time()
         results['cost'] = bssf.cost if foundTour else math.inf
@@ -345,17 +346,20 @@ class TSPSolver:
 
     def weight_and_select(self, f, s, t):
         sumsol = f.cost + s.cost + t.cost
-        prob1 = f.cost / sumsol * 100
-        prob2 = s.cost / sumsol * 100
-        prob3 = t.cost / sumsol * 100
-        dieroll = random.randint(0, 100)
+        if(sumsol < float('inf')):
+            prob1 = f.cost / sumsol * 100
+            prob2 = s.cost / sumsol * 100
+            prob3 = t.cost / sumsol * 100
+            dieroll = random.randint(0, 100)
 
-        if dieroll > prob3:
-            return t
-        elif dieroll > prob2:
-            return s
+            if dieroll > prob3:
+                return t
+            elif dieroll > prob2:
+                return s
+            else:
+                return f
         else:
-            return f
+            return t
 
     def initialize_population(self, num_of_generations):
         cities = self._scenario.getCities()
