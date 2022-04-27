@@ -324,7 +324,7 @@ class TSPSolver:
             first, second, third = self.get_random_paths(population)
             m = self.weight_and_select(first, second, third)
             # breed
-            new_path = self.crossover(bssf.path, m.path)
+            new_path = self.crossover(bssf.route, m.route)
             child = TSPSolution(new_path)
             if m.cost > child.cost:
                 # toss the parent, replace with child
