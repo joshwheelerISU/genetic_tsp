@@ -386,7 +386,7 @@ class TSPSolver:
         # amount of samples from the population
         a, b, c = 0, 0, 0
         # select random samples from the population pool.
-        while a == b == c:
+        while a == b  or b == c or a == c:
             a = random.randint(0, len(population) - 1)
             b = random.randint(0, len(population) - 1)
             c = random.randint(0, len(population) - 1)
@@ -397,6 +397,12 @@ class TSPSolver:
         pass
 
     def get_mutation(self, givenpath):
+        """
+        It swaps two cities in the path.
+        
+        :param givenpath: the path to be mutated
+        :return: The mutated path.
+        """
         cities = self._scenario.getCities()
         mutationvalid = False
         a = 0
@@ -433,4 +439,38 @@ class TSPSolver:
         if random.randint(0,100) > 80:
             new_path = self.get_mutation(new_path)
         return new_path
+
+    def get_parent(self):
+        pass
+
+    def test_next_generation(self, prev_population):
+        """
+        For each individual in the next generation, select two parents at random, and create a child by
+        combining the parents' genes.
+        
+        :param prev_population: the previous generation of the population
+        :return: A list of the next generation.
+        """
+     
+        next_generation = [None] * len(prev_population)
+
+        for i in range(len(prev_population)):
+            parent1, parent2 = None, None 
+
+            while parent1 == parent2:
+                parent1 = self.get_parent()
+                parent2 = self.get_parent()
+
+            next_generation[i] = self.crossover(parent1, parent2)
+
+        return next_generation
+
+        
+    
+            
+       
+
+
+
+        pass
 
