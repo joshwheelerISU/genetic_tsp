@@ -400,7 +400,8 @@ class TSPSolver:
     def get_mutation(self, givenpath):
         cities = self._scenario.getCities()
         mutationvalid = False
-        a, b = 0
+        a = 0
+        b = 0
         while a == b:
             a = random.randint(1, len(givenpath) - 1)
             b = random.randint(1, len(givenpath) - 1)
