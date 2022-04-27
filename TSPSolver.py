@@ -288,64 +288,51 @@ class TSPSolver:
             tot = tot + x
         return tot, rcm
 
-
-    ''' <summary>
-		This is the entry point for the algorithm you'll write for your group project.
-		</summary>
-		<returns>results dictionary for GUI that contains three ints: cost of best solution, 
-		time spent to find best solution, total number of solutions found during search, the 
-		best solution found.  You may use the other three field however you like.
-		algorithm</returns> 
-	'''
-
+    # <summary>
+    # This is the entry point for the algorithm you'll write for your group project.
+    # </summary>
+    # <returns>results dictionary for GUI that contains three ints: cost of best solution,
+    # time spent to find best solution, total number of solutions found during search, the
+    # best solution found.  You may use the other three field however you like.
+    # algorithm</returns>
+    # 1. call greedy algorithm function to get bssf
+    # 2. call init population function
+    # 3. call function to retrieve 3 random samples from population, each with a
+    # different weight depending on their cost
+    # 4. call crossover function
+    # 5. determine if mutation will occur, if so, call mutation function
+    # 6. compare the result to the current best results and switch paths accordingly
     def fancy(self, time_allowance=60.0):
-
-        # 1. call greedy algorithm function to get bssf
-        # 2. call init population function
-        # 3. call function to retrieve 3 random samples from population, each with a
-        # different weight depending on their cost
-        # 4. call crossover function
-        # 5. determine if mutation will occur, if so, call mutation function
-        # 6. compare the result to the current best results and switch paths accordingly
-
         results = {}
         cities = self._scenario.getCities()
         ncities = len(cities)
         foundTour = False
         count = 0
         bssf = None
-        tspCalculator = TSPCalculator(ncities)
-        start_time = time.time()
+        # finding the initial bssf - shouldn't count towards time
+        bssf = self.greedy()[bssf]
 
-        adj = np.zeros((tspCalculator.N, tspCalculator.N))
-        for i in range(ncities):
-            for j in range(ncities):
-                adj[i][j] = cities[i].costTo(cities[j])
-        
-        # create a bssf with the greedy algorithm
-        bssf = tspCalculator.greedy_solve(adj)
+        start_time = time.time()
 
         # initialize the population with a size of (50)
         population = self.initialize_population(50)
+        population[0] = bssf
 
-        # assign 3 separate paths from the population pool
-        # first will be the shortest cost, second will be the next, and thrid the worst
-        first, second, third = self.get_random_paths(population)
-
-        # now determine which path gets chosen via weights
-        # I set it so the split is 70% 20% 10%
-        chosen = None
-        rand = random.randint(1, 100)
-        if rand < 70:
-            chosen = first
-        elif rand >= 70 and rand < 90:
-            chosen = second
-        else:
-            chosen = third
-        
-        # now send the bssf and the chosen path into the crossover function
-        new_path = self.crossover(bssf.route, chosen.route)
-
+        # main loop body definition
+        while time.time() - start_time < time_allowance:
+            # mate selection
+            first, second, third = self.get_random_paths(population)
+            m = self.weight_and_select(first, second, third)
+            # breed
+            new_path = self.crossover(bssf.path, m.path)
+            child = TSPSolution(new_path)
+            if m.cost > child.cost:
+                # toss the parent, replace with child
+                population[population.index(m)] = child
+                # additional check for if this is the new bssf
+                if bssf.cost > child.cost:
+                    bssf = child
+        # final return preparation
         end_time = time.time()
         results['cost'] = bssf.cost if foundTour else math.inf
         results['time'] = end_time - start_time
@@ -356,6 +343,22 @@ class TSPSolver:
         results['pruned'] = None
         return results
 
+    def weight_and_select(self, f, s, t):
+        nf = TSPSolution(f)
+        ns = TSPSolution(s)
+        nt = TSPSolution(t)
+        sumsol = nf.cost + ns.cost + nt.cost
+        prob1 = nf.cost / sumsol * 100
+        prob2 = ns.cost / sumsol * 100
+        prob3 = nt.cost / sumsol * 100
+        dieroll = random.randint(0, 100)
+
+        if dieroll > prob3:
+            return t
+        elif dieroll > prob2:
+            return s
+        else:
+            return f
 
     def initialize_population(self, num_of_generations):
         cities = self._scenario.getCities()
@@ -370,7 +373,6 @@ class TSPSolver:
             population.append(TSPSolution(new_cities))
 
         return population
-    
 
     # simple function used for sorting list of TSPSolutions
     def get_TSP_cost(self, path):
@@ -379,22 +381,19 @@ class TSPSolver:
     # function takes in the population pool and selects 3 random unique solutions
     # they are then sorted in a list and returned in ascending order of cost
     def get_random_paths(self, population):
-        # 3 variables, can be adjusted to accomodate returning a larger
+        # 3 variables, can be adjusted to accommodate returning a larger
         # amount of samples from the population
-        a, b ,c = 0, 0, 0
+        a, b, c = 0, 0, 0
         # select random samples from the population pool.
         while a == b == c:
             a = random.randint(0, len(population) - 1)
             b = random.randint(0, len(population) - 1)
             c = random.randint(0, len(population) - 1)
-        
-        # sort them based on their cost
-        pop_list = [population[a], population[b], population[c]]
-        pop_list.sort(key=self.get_TSP_cost)
-        
-        # we now have 3 unique indexes from the population pool, so return them
-        return pop_list[0], pop_list[1], pop_list[2]
+            # we now have 3 unique indexes from the population pool, so return them
+        return population[a], population[b], population[c]
 
+    def weighted_selection(self):
+        pass
 
     def get_mutation(self, givenpath):
         cities = self._scenario.getCities()
@@ -417,17 +416,15 @@ class TSPSolver:
         givenpath[b] = save
         return givenpath
 
-    # function takes the route of the bssf and route of the chosen path, then
-    # crosses them over to create a new path
-    def crossover(self, bssf, chosen):
+    # function
+    def crossover(self, bssf, rand_path):
         # take half of the best stored path
         # floor value in case of odd length
         new_path = bssf[:math.floor(len(bssf) / 2)]
 
-        # Now take half of the chosen and combine 
+        # Now take half of the rand_path and combine 
         # the 2 to create the new path
-        for i in chosen: 
+        for i in rand_path:
             if i not in new_path:
                 new_path.append(i)
-        
         return new_path
