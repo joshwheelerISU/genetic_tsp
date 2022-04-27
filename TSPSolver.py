@@ -387,6 +387,7 @@ class TSPSolver:
         a, b, c = 0, 0, 0
         # select random samples from the population pool.
         while a == b == c:
+            print("duh")
             a = random.randint(0, len(population) - 1)
             b = random.randint(0, len(population) - 1)
             c = random.randint(0, len(population) - 1)
@@ -399,7 +400,8 @@ class TSPSolver:
     def get_mutation(self, givenpath):
         cities = self._scenario.getCities()
         mutationvalid = False
-        while mutationvalid == False:
+        a, b = 0
+        while a == b:
             a = random.randint(1, len(givenpath) - 1)
             b = random.randint(1, len(givenpath) - 1)
             # while (a == b):
