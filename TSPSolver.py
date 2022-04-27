@@ -431,3 +431,6 @@ class TSPSolver:
         if random.randint(0,100) > 80:
             new_path = self.get_mutation(new_path)
         return new_path
+
+
+    # shitass
