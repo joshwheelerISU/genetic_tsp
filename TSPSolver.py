@@ -335,7 +335,7 @@ class TSPSolver:
                     count = count + 1
         # final return preparation
         end_time = time.time()
-        results['cost'] = bssf.cost if foundTour else math.inf
+        results['cost'] = bssf.cost
         results['time'] = end_time - start_time
         results['count'] = count
         results['soln'] = bssf
@@ -387,7 +387,6 @@ class TSPSolver:
         a, b, c = 0, 0, 0
         # select random samples from the population pool.
         while a == b == c:
-            print("duh")
             a = random.randint(0, len(population) - 1)
             b = random.randint(0, len(population) - 1)
             c = random.randint(0, len(population) - 1)
@@ -435,5 +434,3 @@ class TSPSolver:
             new_path = self.get_mutation(new_path)
         return new_path
 
-
-    # shitass
