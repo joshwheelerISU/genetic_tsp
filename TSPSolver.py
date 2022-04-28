@@ -379,7 +379,7 @@ class TSPSolver:
             # I think it would be eaiser if we just called 
             # the cost once when we crossover and check if 
             # the new child is better than bssf
-            population.append(new_cities)
+            population.append(TSPSolution(new_cities))
 
         return population
 
